@@ -3,6 +3,7 @@ import InputManagement from './movement.js';
 
 
 let canvas = document.getElementById("game");
+//let scoreboard = document.getElementById("score");
 let ct = canvas.getContext("2d");
 
 const GAME_HEIGHT = 600;
