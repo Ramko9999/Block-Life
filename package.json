@@ -1,0 +1,23 @@
+{
+  "name": "tiger-lime",
+  "version": "1.0.0",
+  "description": "A reinforcement agent that will beat the game Tiger Lime",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/futuristacademy/TigerLime.git"
+  },
+  "author": "Ramki Pitchala",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/futuristacademy/TigerLime/issues"
+  },
+  "homepage": "https://github.com/futuristacademy/TigerLime#readme",
+  "dependencies": {
+    "@tensorflow/tfjs": "^1.3.1",
+    "express": "^4.17.1"
+  }
+}

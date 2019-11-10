@@ -1,6 +1,6 @@
-import Tiger from './tiger.js';
-import InputManagement from './movement.js';
-import Obstacle from './obstacle.js';
+import Tiger from './tiger.js.js';
+import InputManagement from './movement.js.js';
+import Obstacle from './obstacle.js.js';
 
 
 let canvas = document.getElementById("game");
