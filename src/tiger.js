@@ -9,6 +9,7 @@ class Tiger{
         this.height = 30
         this.width = 30;
 
+        //score of the game
         this.score = 0;
         
         this.position = {
@@ -17,7 +18,7 @@ class Tiger{
         };
 
         this.velocity = {
-            x: 3,
+            x: 0,
             y: 0,
         }
 
@@ -25,11 +26,6 @@ class Tiger{
         this.inDuck = false;
 
         this.gravity = 3;
-
-        this.incrementVelocity = function(counter){
-            this.velocity.x += 0*counter/1000;
-            return this.velocity.x;
-        }
 
     }
 
@@ -59,7 +55,7 @@ class Tiger{
         
         //making sure double jumps do not occur. one can only jump when the tiger is at its base position
         if(this.position.y == this.GAME_HEIGHT -  this.height){
-            this.velocity.y = -17 * multipler; 
+            this.velocity.y = -17 * multipler;  //give inital velocity in y direction
             this.inJump = true;
             this.inDuck =  false;
 
@@ -81,9 +77,10 @@ class Tiger{
     
     //handles automatic player movement
     move(){
-
+        
         if(this.inJump){
 
+            //cut velocity in an near instaneous manner to simulate gravity
             this.velocity.y += 1/2*this.gravity
             
             if(this.velocity.y < 0){
@@ -92,7 +89,8 @@ class Tiger{
             else{
 
                 this.position.y += this.velocity.y
-              
+                
+                //check for collision with ground
                 if(this.position.y >= this.GAME_HEIGHT - this.height){
                     this.velocity.y = 0;
                     this.inJump = false;
@@ -100,10 +98,7 @@ class Tiger{
                 }
             }
         }
-        
-       
-        //this.position.x += this.incrementVelocity(10);
-        this.score += this.incrementVelocity(10) /100;
+
         this.position.x = this.position.x % this.GAME_WIDTH;
     }
 }

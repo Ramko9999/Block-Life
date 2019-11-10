@@ -27,8 +27,10 @@ class InputManagement{
                     break;
                 
                 case 32:
-                    this.jumpMultipler *= 1.09
-                    this.jumpMultipler = Math.min(this.jumpMultipler, 1.2);
+
+                    //increase the power of jumps
+                    this.jumpMultipler *= 1.22
+                    this.jumpMultipler = Math.min(this.jumpMultipler, 1.5);
                     break;
             }
 
