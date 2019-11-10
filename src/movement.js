@@ -4,6 +4,7 @@ class InputManagement{
         
         this.player = player;
         this.jumpMultipler = 1;
+        this.counter = 0 ;
 
         document.addEventListener("keyup", event=>{
             player.release();
@@ -12,6 +13,7 @@ class InputManagement{
                 
                 case 32:
                     player.jump(this.jumpMultipler);
+                    this.jumpMultipler = 1;
                     break;
             }
         });

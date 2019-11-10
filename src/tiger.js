@@ -12,7 +12,7 @@ class Tiger{
         this.score = 0;
         
         this.position = {
-            x: gW/2,
+            x: 75,
             y: gH -  this.height,
         };
 
@@ -37,6 +37,7 @@ class Tiger{
     //draws tiger based on provided context
     draw(ct){
         
+        ct.fillStyle = "#FF00FF";
         ct.fillRect(
             this.position.x,
             this.position.y,
@@ -58,7 +59,7 @@ class Tiger{
         
         //making sure double jumps do not occur. one can only jump when the tiger is at its base position
         if(this.position.y == this.GAME_HEIGHT -  this.height){
-            this.velocity.y = -25 * multipler; 
+            this.velocity.y = -17 * multipler; 
             this.inJump = true;
             this.inDuck =  false;
 
@@ -101,7 +102,7 @@ class Tiger{
         }
         
        
-        this.position.x += this.incrementVelocity(10);
+        //this.position.x += this.incrementVelocity(10);
         this.score += this.incrementVelocity(10) /100;
         this.position.x = this.position.x % this.GAME_WIDTH;
     }
