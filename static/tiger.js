@@ -1,9 +1,35 @@
+import * as tf from "@tensorflow/tfjs";
+
 class Tiger{
 
     constructor(gH, gW){
         
         this.GAME_WIDTH = gW;
         this.GAME_HEIGHT = gH;
+
+        
+        this.model = tf.sequential();
+
+        /*
+        features: distance to nearest obstacle, distance for nearest obstacle to next, height1, offest1, height2, offest2
+        */
+        this.model.add(tf.layers.dense(
+            {"units": 6, 
+            "input": [6],
+            "activation": 'sigmoid'
+        }
+        ));
+
+        //probablity output
+        this.model.add(tf.layers.dense(
+            {
+                "units": 3,
+                "activation": "softmax"
+            }
+        ));
+
+        this.weights = this.model.layers[0].getWeights.concact(this.model.layers[1].getWeights);
+
 
 
         this.height = 30
@@ -24,6 +50,7 @@ class Tiger{
 
         this.inJump = false;
         this.inDuck = false;
+        this.isDead = false;
 
         this.gravity = 3;
 
@@ -33,14 +60,16 @@ class Tiger{
     //draws tiger based on provided context
     draw(ct){
         
-        ct.fillStyle = "#FF00FF";
-        ct.fillRect(
-            this.position.x,
-            this.position.y,
-            this.width,
-            this.height,
-        );
-
+        if(!this.isDead){
+            ct.fillStyle = "#FF00FF";
+            ct.fillRect(
+                this.position.x,
+                this.position.y,
+                this.width,
+                this.height,
+            );
+        }
+       
     }
 
     //unbind player from ducking
@@ -101,6 +130,13 @@ class Tiger{
 
         this.position.x = this.position.x % this.GAME_WIDTH;
     }
+    
+    predict(){
+    
+    }
+    
+
 }
+
 
 export default Tiger;
