@@ -24,7 +24,7 @@ class Obstacle{
         this.heightOffset = 0;
         
         //used to create flying obstacles
-        if(obstacleRNG < 35){
+        if(obstacleRNG < 50){
             this.heightOffset = Math.max(Math.min(Math.floor(Math.random() * 100), 40), 20)
             this.position.y -= this.heightOffset;
         }

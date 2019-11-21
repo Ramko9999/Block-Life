@@ -1,4 +1,6 @@
-import * as tf from "@tensorflow/tfjs";
+
+import getRandomColor from './utils.js';
+import Model from './model.js';
 
 class Tiger{
 
@@ -6,34 +8,12 @@ class Tiger{
         
         this.GAME_WIDTH = gW;
         this.GAME_HEIGHT = gH;
-
-        
-        this.model = tf.sequential();
-
-        /*
-        features: distance to nearest obstacle, distance for nearest obstacle to next, height1, offest1, height2, offest2
-        */
-        this.model.add(tf.layers.dense(
-            {"units": 6, 
-            "input": [6],
-            "activation": 'sigmoid'
-        }
-        ));
-
-        //probablity output
-        this.model.add(tf.layers.dense(
-            {
-                "units": 3,
-                "activation": "softmax"
-            }
-        ));
-
-        this.weights = this.model.layers[0].getWeights.concact(this.model.layers[1].getWeights);
-
-
+        this.DUCK_HEIGHT_MULTIPLIER = 0.5;
 
         this.height = 30
         this.width = 30;
+
+        this.color = getRandomColor();
 
         //score of the game
         this.score = 0;
@@ -54,14 +34,22 @@ class Tiger{
 
         this.gravity = 3;
 
+        this.model;
     }
+
+
+    setModel(model){
+        this.model = model;
+    }
+
+
 
 
     //draws tiger based on provided context
     draw(ct){
         
         if(!this.isDead){
-            ct.fillStyle = "#FF00FF";
+            ct.fillStyle = this.color;
             ct.fillRect(
                 this.position.x,
                 this.position.y,
@@ -87,7 +75,13 @@ class Tiger{
             this.velocity.y = -17 * multipler;  //give inital velocity in y direction
             this.inJump = true;
             this.inDuck =  false;
+        }
 
+        if(this.inDuck){
+            this.inDuck = false;
+            this.position.y == this.GAME_HEIGHT -  this.height;
+            this.velocity.y = -17 * multipler;  //give inital velocity in y direction
+            this.inJump = true;
         }
 
     }
@@ -131,12 +125,31 @@ class Tiger{
         this.position.x = this.position.x % this.GAME_WIDTH;
     }
     
-    predict(){
-    
-    }
-    
 
+    //used for the AI to predict when to jump and duck etc...
+    predict(enviroment){
+
+        var index = Model.predict(this.model, enviroment);
+
+        switch(index){
+            case 1:
+                this.jump(1);
+                break;
+            case 2:
+                this.jump(1.5);
+                break;
+            case 3:
+                this.duck();
+                break;
+            default:
+                //do nothing
+                
+        }
+        
+    }
 }
 
 
 export default Tiger;
+
+
