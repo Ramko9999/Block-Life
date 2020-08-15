@@ -1,48 +1,56 @@
-import getRandomColor from './utils.js';
+import getRandomColor from './util/color.js';
 import Model from './model.js';
+import GAME from "./util/constants.js";
 
-class Tiger {
+class Block {
 
-    constructor(gH, gW) {
-
-        this.GAME_WIDTH = gW;
-        this.GAME_HEIGHT = gH;
-        this.DUCK_HEIGHT_MULTIPLIER = 0.5;
-
-        this.height = 30
-        this.width = 30;
-
+    constructor() {
+        this.height = GAME.BLOCK.HEIGHT
+        this.width = GAME.BLOCK.WIDTH;
         this.color = getRandomColor();
-
-        //score of the game
         this.score = 0;
-
         this.position = {
-            x: 75,
-            y: gH - this.height,
+            x: GAME.BLOCK.START_X,
+            y: GAME.HEIGHT - this.height,
         };
-
         this.velocity = {
             x: 0,
             y: 0,
         }
-
         this.inJump = false;
         this.inDuck = false;
         this.isDead = false;
-
-        this.gravity = 3;
-
         this.model;
+    }
+
+    SetYToGround(){
+        this.position.y = GAME.HEIGHT - this.height
+    }
+
+    isBlockAtGround(){
+        return this.position.y === GAME.HEIGHT - this.height;
+    }
+
+    getX(){
+        return this.position.x;
+    }
+
+    getY(){
+        return this.position.y;
+    }
+
+    getH(){
+        return this.height;
+    }
+
+    getW(){
+        return this.width;
     }
 
 
     setModel(model) {
         this.model = model;
     }
-
-
-
 
     //draws tiger based on provided context
     draw(ct) {
@@ -59,40 +67,26 @@ class Tiger {
 
     }
 
-    //unbind player from ducking
     release() {
         this.inDuck = false;
-        this.position.y = this.GAME_HEIGHT - this.height;
+        this.position.y = GAME.HEIGHT - this.height;
     }
 
-
-    //handles when the player is supposed to jump
-    jump(multipler) {
-
-        //making sure double jumps do not occur. one can only jump when the tiger is at its base position
-        if (this.position.y == this.GAME_HEIGHT - this.height) {
-            this.velocity.y = -17 * multipler; //give inital velocity in y direction
-            this.inJump = true;
+    jump(multiplier) {
+        if(this.inDuck){
             this.inDuck = false;
+            this.SetYToGround();
         }
-
-        if (this.inDuck) {
-            this.inDuck = false;
-            this.position.y == this.GAME_HEIGHT - this.height;
-            this.velocity.y = -17 * multipler; //give inital velocity in y direction
+        if (this.isBlockAtGround()) {
+            this.velocity.y = -17 * multiplier; 
             this.inJump = true;
         }
-
     }
 
-    //handles when the player is suppoesed to duck
     duck() {
-
-        //set the avatar to half its size
-        if (this.position.y == this.GAME_HEIGHT - this.height) {
-
+        if (this.isBlockAtGround()) {
             this.inDuck = true;
-            this.position.y = this.GAME_HEIGHT - this.height / 2;
+            this.position.y = GAME.HEIGHT - this.height / 2;
         }
 
     }
@@ -103,7 +97,7 @@ class Tiger {
         if (this.inJump) {
 
             //cut velocity in an near instaneous manner to simulate gravity
-            this.velocity.y += 1 / 2 * this.gravity
+            this.velocity.y += 1 / 2 * GAME.GRAVITY
 
             if (this.velocity.y < 0) {
                 this.position.y += this.velocity.y;
@@ -112,15 +106,15 @@ class Tiger {
                 this.position.y += this.velocity.y
 
                 //check for collision with ground
-                if (this.position.y >= this.GAME_HEIGHT - this.height) {
+                if (this.position.y >= GAME.HEIGHT - this.height) {
                     this.velocity.y = 0;
                     this.inJump = false;
-                    this.position.y = this.GAME_HEIGHT - this.height;
+                    this.position.y = GAME.HEIGHT - this.height;
                 }
             }
         }
 
-        this.position.x = this.position.x % this.GAME_WIDTH;
+        this.position.x = this.position.x % GAME.WIDTH;
     }
 
 
@@ -145,4 +139,4 @@ class Tiger {
 }
 
 
-export default Tiger;
+export default Block;

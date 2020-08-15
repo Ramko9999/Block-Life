@@ -1,205 +1,7 @@
-import Tiger from "./tiger.js";
-import InputManagement from './movement.js';
-import Obstacle from './obstacle.js';
+import Block from "./block.js";
+import Game from "./game.js";
 import Model from './model.js';
 
-
-class GameStateHandler {
-    static IN_PAUSE = "Paused";
-    static IN_RUN = "Running";
-    static IN_START = "Start";
-
-}
-
-class Game {
-
-    constructor(canvas) {
-        this.ct = canvas.getContext("2d");
-
-        //game variables
-        this.GAME_HEIGHT = 600;
-        this.GAME_WIDTH = 800;
-
-        this.startEnviromentVars();
-        this.playerList = [];
-    }
-
-    startEnviromentVars() {
-
-        this.enemySpeed = 4;
-        //for generating enemy variabes and controlling game flow
-        this.randomMultipler = 0.045;
-        this.obstacleQueue = [];
-        this.gameOver = false;
-        this.minimumTiles = 65; // a cooldown counter
-        this.counter = 0;
-    }
-
-    drawScoreboard(score){
-        
-        this.ct.font = "24px Arial";
-        this.ct.fillStyle = "#000000";
-        this.ct.fillText("Score: " + score, 8, 25);
-    }
-
-    createInputManagement(t) {
-        new InputManagement(t);
-    }
-
-
-    //checks for collision between players and obstacles
-    checkForCollision() {
-
-        var isEveryBodyDead = true;
-        var nearestOb = this.obstacleQueue[0];
-        var playListLength = this.playerList.length;
-
-        for (var j = 0; j < playListLength; j++) {
-
-            //grab player and nearest obstacle
-            var player = this.playerList[j];
-
-
-            //check for collision with closest obstacle in the queue for all potential players
-            var playerInXRange = (player.position.x + player.width) <= (nearestOb.position.x + nearestOb.width) && (player.position.x + player.width) >= (nearestOb.position.x);
-
-            //y axis bounds on object
-            var obsYBounds = {
-                lower: this.GAME_HEIGHT - nearestOb.heightOffset,
-                upper: this.GAME_HEIGHT - nearestOb.heightOffset - nearestOb.height,
-
-            };
-
-            var playerInYRange = false;
-
-            if (player.inJump) {
-                playerInYRange = player.position.y + player.height >= obsYBounds.upper;
-            } else if (player.inDuck) {
-                playerInYRange = this.GAME_HEIGHT - (player.height / 2) <= obsYBounds.lower;
-            } else {
-                if (nearestOb.heightOffset <= player.height) {
-                    playerInYRange = true;
-                }
-            }
-
-            if (playerInXRange && playerInYRange) {
-                player.isDead = true;
-            }
-
-            if (!player.isDead) {
-                isEveryBodyDead = false;
-            }
-
-        }
-        if (isEveryBodyDead) {
-            this.gameOver = true;
-        }
-
-
-    }
-
-    //used tp generate an obstacle
-    generateObstacle() {
-
-        var random = Math.random();
-        if (this.counter == 0) {
-            //generate an obstacle at that space
-
-            if (random < this.randomMultipler) {
-
-                //generate obstacle and push onto queue
-                var obstacle = new Obstacle(this.GAME_WIDTH - 15, this.GAME_HEIGHT, this.GAME_WIDTH, this.enemySpeed);
-                this.obstacleQueue.push(obstacle);
-
-                //obstacle created
-
-                //reduce likeyhood for generating obstacle instantly and create a cooldown period
-                this.randomMultipler -= this.randomMultipler * 0.1;
-                this.counter = this.minimumTiles;
-                this.enemySpeed *= 1.05;
-
-            } else {
-
-                //increase likelyhood of obstacle generating
-                this.randomMultipler += this.randomMultipler * 0.001;
-            }
-        } else {
-            this.counter--;
-        }
-    }
-
-    removeObstacle() {
-
-        var playListLength = this.playerList.length;
-
-        //dequeue obstacle if they fall of the game
-        if (this.obstacleQueue[0].position.x < 0) {
-            this.obstacleQueue.shift();
-
-            //add to score for jumping over enemies
-            for (var i = 0; i < playListLength; i++) {
-                this.playerList[i].score += 1;
-            }
-
-        }
-    }
-
-    initPlayers() {
-        var tiger = new Tiger(this.GAME_HEIGHT, this.GAME_WIDTH);
-        this.playerList.push(tiger);
-        this.createInputManagement(tiger);
-        tiger.draw(this.ct);
-    }
-
-    start() {
-        this.initPlayers()
-        requestAnimationFrame(() => this.runGame());
-    }
-
-    //reset the game for another epoch
-    resetGame() {
-        this.startEnviromentVars();
-        this.playerList = [];
-        this.start();
-    }
-
-    runGame() {
-
-        this.ct.clearRect(0, 0, this.GAME_WIDTH, this.GAME_HEIGHT);
-        var playListLength = this.playerList.length;
-
-        if (this.gameOver) {
-            console.log("Game over");
-        } else {
-
-            this.generateObstacle();
-
-            //move and draw al obstacles in the queue
-            for (var i = 0; i < this.obstacleQueue.length; i++) {
-                this.obstacleQueue[i].move();
-                this.obstacleQueue[i].draw(this.ct);
-            }
-            //check for obstacles
-            if (this.obstacleQueue.length > 0) {
-                this.checkForCollision();
-                this.removeObstacle();
-            }
-
-            for (var i = 0; i < playListLength; i++) {
-
-                if (!this.playerList[i].isDead) {
-                    this.playerList[i].move();
-                    this.playerList[i].draw(this.ct);
-                }
-            }
-        }
-
-        this.drawScoreboard(this.playerList[0].score);
-
-        this.enemySpeed *= 1.0005;
-        requestAnimationFrame(() => this.runGame());
-    }
-}
 
 class Train extends Game {
 
@@ -217,7 +19,7 @@ class Train extends Game {
         for (var i = 0; i < this.num; i++) {
             
             //grab tiger player and set model
-            var t = new Tiger(this.GAME_HEIGHT, this.GAME_WIDTH);
+            var t = new Block(this.GAME_HEIGHT, this.GAME_WIDTH);
             t.setModel(Model.getModel());
             this.playerList.push(t);
             t.draw(this.ct);
@@ -294,7 +96,7 @@ class Train extends Game {
 
         this.playerList = [];
         for (var k = 0; k < newModelList.length; k++) {
-            var tiger = new Tiger(this.GAME_HEIGHT, this.GAME_WIDTH);
+            var tiger = new Block(this.GAME_HEIGHT, this.GAME_WIDTH);
             tiger.setModel(newModelList[k]);
             this.playerList.push(tiger);
         }
@@ -386,7 +188,10 @@ class Train extends Game {
     }
 }
 
-
+/*
 var trainingSess = new Train(12, document.getElementById("game"), 15);
 trainingSess.start();
+*/
 
+
+export default Train;

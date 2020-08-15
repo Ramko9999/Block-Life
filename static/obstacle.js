@@ -1,45 +1,38 @@
+import GAME from "./util/constants.js";
+
 class Obstacle {
 
-    constructor(pX, gH, gW, v) {
+    constructor(pX, v) {
 
-        var MAX_HEIGHT  = 65;
-        var MIN_HEIGHT = 30;
-        var MAX_WIDTH = 40;
-        var MIN_WIDTH = 20;
-
-        //controlling height
-        var h = Math.max(Math.min(Math.random() * 100, MAX_HEIGHT), MIN_HEIGHT);
-
-        //cntrolling width
-        var w = Math.max(Math.min(Math.random() * 100, MAX_WIDTH), MIN_WIDTH);
-
-        var obstacleRNG = Math.random() * 100;
-
-        //controlling y position
+        this.height = Math.max(Math.min(Math.random() * 100, GAME.OBSTACLE.MAX_HEIGHT), GAME.OBSTACLE.MIN_HEIGHT);
+        this.width = Math.max(Math.min(Math.random() * 100, GAME.OBSTACLE.MAX_WIDTH), GAME.OBSTACLE.MIN_WIDTH);
         this.position = {
             x: pX,
-            y: gH - h
+            y: GAME.HEIGHT - this.height
         };
-
         this.velocity = {
             x: v,
             y: 0,
         };
-
-        this.heightOffset = 0;
-
-        //used to create flying obstacles
-        if (obstacleRNG < 0) {
-            this.heightOffset = Math.max(Math.min(Math.floor(Math.random() * 100), 40), 20)
-            this.position.y -= this.heightOffset;
+        if (Math.random() < GAME.OBSTACLE.AIR_PROBABILITY) {
+            this.position.y -= Math.max(Math.min(Math.floor(Math.random() * 100), 40), 20);
         }
+    }
 
-        this.width = w;
-        this.height = h;
+    getX(){
+        return this.position.x;
+    }
 
-        this.GAME_WIDTH = gW;
-        this.GAME_HEIGHT = gH;
+    getY(){
+        return this.position.y;
+    }
 
+    getH(){
+        return this.height;
+    }
+
+    getW(){
+        return this.width;
     }
 
     draw(ct) {
@@ -52,7 +45,6 @@ class Obstacle {
             this.height
         )
     }
-
     move() {
         this.position.x -= this.velocity.x;
     }

@@ -1,8 +1,6 @@
 class InputManagement{
 
     constructor(player){
-        
-        this.player = player;
         this.jumpMultipler = 1;
         this.counter = 0 ;
 
