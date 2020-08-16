@@ -16,12 +16,10 @@ class Game {
     constructor(canvas) {
         this.ct = canvas.getContext("2d");
         this.startEnviromentVars();
-        this.playerList = [];
+        this.players = [];
     }
 
     startEnviromentVars() {
-        //for generating enemy variabes and controlling game flow
-
         this.obstacleSpeed = GAME.OBSTACLE.BASE_SPEED;
         this.randomMultipler = 0.045;
         this.obstacleQueue = [];
@@ -44,7 +42,7 @@ class Game {
         let isEveryBodyDead = true;
         let nearest = this.obstacleQueue[0];
 
-        for (const player of this.playerList) {
+        for (const player of this.players) {
             let playerCoordinates = {x: player.getX(), y: player.getY(), w:player.getW(), h:player.getH()}
             let nearestCoordinates = {x: nearest.getX(), y:nearest.getY(), w:nearest.getW(), h:nearest.getH()}
             if (isColliding(playerCoordinates, nearestCoordinates)) {
@@ -84,7 +82,7 @@ class Game {
         if (this.obstacleQueue[0].position.x < 0) {
             this.obstacleQueue.shift();
 
-            for (const player of this.playerList) {
+            for (const player of this.players) {
                 player.score += 1;
             }
         }
@@ -92,7 +90,7 @@ class Game {
 
     initPlayers() {
         let block = new Block();
-        this.playerList.push(block);
+        this.players.push(block);
         this.createInputManagement(block);
         block.draw(this.ct);
     }
@@ -104,7 +102,7 @@ class Game {
 
     resetGame() {
         this.startEnviromentVars();
-        this.playerList = [];
+        this.players = [];
         this.start();
     }
 
@@ -122,13 +120,14 @@ class Game {
                 obstacle.move();
                 obstacle.draw(this.ct);
             }
-            //check for obstacles
+          
+            
             if (this.obstacleQueue.length > 0) {
                 this.checkForCollision();
                 this.removeObstacle();
             }
 
-            for (const player of this.playerList) {
+            for (const player of this.players) {
                 if (!player.isDead) {
                     player.move();
                     player.draw(this.ct);
@@ -136,7 +135,7 @@ class Game {
             }
         }
 
-        this.drawScoreboard(this.playerList[0].score);
+        this.drawScoreboard(this.players[0].score);
 
         this.obstacleSpeed *= 1.0005;
         requestAnimationFrame(() => this.runGame());

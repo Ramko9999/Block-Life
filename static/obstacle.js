@@ -15,7 +15,8 @@ class Obstacle {
             y: 0,
         };
         if (Math.random() < GAME.OBSTACLE.AIR_PROBABILITY) {
-            this.position.y -= Math.max(Math.min(Math.floor(Math.random() * 100), 40), 20);
+            this.position.y -= Math.max(Math.min(Math.floor(Math.random() * 100), GAME.OBSTACLE.MAX_HEIGHT_OFFSET),
+                               GAME.OBSTACLE.MIN_HEIGHT_OFFSET);
         }
     }
 
@@ -33,6 +34,11 @@ class Obstacle {
 
     getW(){
         return this.width;
+    }
+
+    getNormY(){
+        const delta = this.position.y - (GAME.HEIGHT - GAME.OBSTACLE.MAX_HEIGHT - GAME.OBSTACLE.MAX_HEIGHT_OFFSET);
+        return delta/(GAME.OBSTACLE.MAX_HEIGHT_OFFSET + GAME.OBSTACLE.MAX_HEIGHT - GAME.OBSTACLE.MIN_HEIGHT);
     }
 
     draw(ct) {

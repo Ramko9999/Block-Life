@@ -1,111 +1,83 @@
 import Block from "./block.js";
 import Game from "./game.js";
-import Model from './model.js';
-
-
+import GAME from "./util/constants.js";
+import NeuralNetwork from "./nn/nn.js";
 class Train extends Game {
 
-    constructor(numOfPlayers, canvas, epochs) {
+    constructor(n, canvas, epochs) {
         super(canvas);
-        this.num = numOfPlayers;
+        this.n = n;
         this.epochs = epochs;
-        this.playerList = [];
-
+        this.players;
     }
-    //initalize players
+
     initPlayers() {
-
-        this.playerList = [];
-        for (var i = 0; i < this.num; i++) {
-            
-            //grab tiger player and set model
-            var t = new Block(this.GAME_HEIGHT, this.GAME_WIDTH);
-            t.setModel(Model.getModel());
-            this.playerList.push(t);
-            t.draw(this.ct);
+        this.players = [];
+        for (let i = 0; i < this.n; i++) {
+            let block = new Block();
+            block.setModel(new NeuralNetwork(4, 4, 4));
+            this.players.push(block);
+            block.draw(this.ct);
         }
     }
-    
+
+
+    performCrossover(a, b) {
+
+    }
+
+    breedPool(pool) {
+        const swap = (i, j) => {
+            const temp = pool[j];
+            pool[j] = pool[i];
+            pool[i] = temp;
+        }
+        const pairs = [];
+        for (let i = 0; i < pool.length; i++) {
+            const range = pool.length - 1;
+            swap(i, range);
+            const fi = Math.floor(Math.random() * range);
+            pairs.push([pool[fi].model, pool[i].model]);
+            range -= 1;
+            swap(fi, range - 1);
+            const se = Math.floor(Math.random() * range);
+            pairs.push([pool[se].model, pool[i].model]);
+            swap(fi, range)
+            range += 1;
+            swap(i, range);
+        }
+        const children = [];
+        pairs.forEach(([a, b]) => {
+            [A, B] = this.performCrossover(a, b);
+            children.push(A);
+            children.push(B);
+        });
+        return children;
+    }
+
+    createNextGeneration() {
+        const totalFitness = this.players.reduce((accm, value) => accm + value);
+        const scores = this.players.map((value) => {
+            return value / totalFitness;
+        });
+        let interval = 2 / (this.players.length);
+        let prefixSum = 0
+        let pointer = interval;
+        const pool = [];
+        scores.forEach((score, index) => {
+            if (pointer >= prefixSum && pointer <= prefixSum + score) {
+                pool.push(this.players[index]);
+            }
+            pointer += interval;
+            prefixSum += score;
+        });
+        //const nextGen = breedPool(pool);
+    }
+
     resetGame() {
-
         this.startEnviromentVars();
-        //a way to pool the fittest candidates of the game with rouleete section
-
-        var totalScore = 0;
-        var top_fitness = [];
-        var maxScore = 0;
-        var index = 0;
-
-        for (var i = 0; i < this.playerList.length; i++) {
-            if (this.playerList[i].score > maxScore) {
-                maxScore = this.playerList[i].score;
-                index = i;
-            }
-            totalScore += this.playerList[i].score;
-        }
-
-        console.log("Max Score of Generation is: " + maxScore + " at: " + index);
-
-        for (var j = 0; j < this.playerList.length / 2; j++) {
-
-            var scoreSum = totalScore;
-            var targetScore = Math.random() * scoreSum;
-            var tempIndex = 0;
-            var tempScore = this.playerList[0].score;
-            var m1 = this.playerList[Math.floor(Math.random() * this.playerList.length)].model;
-            var m2 = this.playerList[Math.floor(Math.random() * this.playerList.length)].model;
-
-            console.log("----------------------------");
-            for (var i = 0; i < this.playerList.length; i++) {
-                if (targetScore - this.playerList[i].score < 0) {
-                    m1 = this.playerList[i].model;
-                    scoreSum -= this.playerList[i].score;
-                    tempScore = this.playerList[i].score;
-                    tempIndex = i;
-                    this.playerList[i].score = 0;
-
-                    break;
-                }
-                targetScore -= this.playerList[i].score;
-            }
-
-            var targetScore = Math.random() * scoreSum;
-            for (var i = 0; i < this.playerList.length; i++) {
-                if (targetScore - this.playerList[i].score < 0) {
-                    m2 = this.playerList[i].model;
-                    break;
-                }
-                targetScore -= this.playerList[i].score;
-            }
-
-            this.playerList[tempIndex].score = tempScore;
-            top_fitness.push(m1, m2);
-        }
-        var newModelList = [];
-
-        for (var i = 0; i < top_fitness.length - 1; i += 2) {
-
-            var t1 = top_fitness[i];
-            var t2 = top_fitness[i + 1];
-
-            var models = Model.mitosis(t1, t2);
-
-            newModelList.push(models[0]);
-            newModelList.push(models[1]);
-        }
-
-        this.playerList = [];
-        for (var k = 0; k < newModelList.length; k++) {
-            var tiger = new Block(this.GAME_HEIGHT, this.GAME_WIDTH);
-            tiger.setModel(newModelList[k]);
-            this.playerList.push(tiger);
-        }
-
-        this.ct.clearRect(0, 0, this.GAME_WIDTH, this.GAME_HEIGHT);
-        for (var i = 0; i < this.playerList.length; i++) {
-            this.playerList[i].draw(this.ct);
-        }
-
+        this.ct.clearRect(0, 0, GAME.WIDTH, GAME.HEIGHT);
+        this.initPlayers();
         console.log(this.epochs + " Epochs Left");
         this.epochs--;
         requestAnimationFrame(() => this.runGame());
@@ -116,82 +88,53 @@ class Train extends Game {
         requestAnimationFrame(() => this.runGame());
     }
 
-    //give a player's prediction based on enviroment variables
-    predict(player) {
 
-        //if a model exists then create features
-        if (!player.inJump && !player.isDead) {
+    getFeatures(player) {
 
-            var ob1 = {
-                dist_x: -100,
-                dist_y: -100,
-                offest_y: -100,
-                width: -100
+        let odx, oy, oh, ow = 0;
+        for (const obstacle of this.obstacleQueue) {
+            if (obstacle.getX() - player.getX() > 0) {
+                odx = (obstacle.getX() - player.getX())/(GAME.WIDTH);
+                oy = obstacle.getNormY();
+                oh = (obstacle.getH() - GAME.OBSTACLE.MIN_HEIGHT)/(GAME.OBSTACLE.MAX_HEIGHT - GAME.OBSTACLE.MIN_HEIGHT);
+                ow = (obstacle.getW() - GAME.OBSTACLE.MIN_WIDTH)/(GAME.OBSTACLE.MAX_WIDTH - GAME.OBSTACLE.MIN_WIDTH);
+                break;
             }
-
-            for(var i = 0; i < this.obstacleQueue.length; i++){
-                
-                var nearestOb = this.obstacleQueue[i];
-                ob1.dist_x = nearestOb.position.x - player.position.x;
-                
-                if(ob1.dist_x > 0){
-                    ob1.dist_y = nearestOb.position.y;
-                    ob1.offest_y = nearestOb.heightOffset;
-                    ob1.width = nearestOb.width;
-                    break;
-                }
-            }
-
-            var features = [this.enemySpeed, ob1.dist_x, ob1.dist_y, ob1.offest_y, ob1.width];
-            player.predict(features);
         }
-
-        if (!player.isDead) {
-            player.move();
-            player.draw(this.ct);
-        }
+        return [odx, oy, oh, ow];
     }
 
-    runGame() {
-
-        this.ct.clearRect(0, 0, this.GAME_WIDTH, this.GAME_HEIGHT);
-        var playListLength = this.playerList.length;
-
-        if (this.gameOver) {
-            if (this.epochs > 0) {
-                this.resetGame();
-            }
-        } else {
-
-            this.generateObstacle();
-
-            //move and draw al obstacles in the queue
-            for (var i = 0; i < this.obstacleQueue.length; i++) {
-                this.obstacleQueue[i].move();
-                this.obstacleQueue[i].draw(this.ct);
-            }
-            //check for obstacles
-            if (this.obstacleQueue.length > 0) {
-                this.checkForCollision();
-                this.removeObstacle();
-            }
-
-
-
-            for (var i = 0; i < playListLength; i++) {
-                this.predict(this.playerList[i]);
-            }
-
-            this.drawScoreboard(this.playerList[0].score);
-            requestAnimationFrame(() => this.runGame());
+runGame() {
+    this.ct.clearRect(0, 0, GAME.WIDTH, GAME.HEIGHT);
+    if (this.gameOver) {
+        if (this.epochs > 0) {
+            this.resetGame();
         }
+    } else {
+        this.generateObstacle();
+        for (const obstacle of this.obstacleQueue) {
+            obstacle.move();
+            obstacle.draw(this.ct);
+        }
+        if (this.obstacleQueue.length > 0) {
+            this.checkForCollision();
+            this.removeObstacle();
+        }
+
+        for (const player of this.players) {
+            if (!player.isDead) {
+                if (!player.inJump) {
+                    player.predict(this.getFeatures(player))
+                }
+                player.move();
+                player.draw(this.ct);
+            }
+
+        }
+        this.drawScoreboard(this.players[0].score);
+        requestAnimationFrame(() => this.runGame());
     }
 }
-
-/*
-var trainingSess = new Train(12, document.getElementById("game"), 15);
-trainingSess.start();
-*/
-
+}
 
 export default Train;

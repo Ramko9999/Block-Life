@@ -15,8 +15,13 @@ const GAME = {
         MAX_HEIGHT: 50,
         MIN_WIDTH: 20,
         MAX_WIDTH: 30,
-        AIR_PROBABILITY: 0.2
+        AIR_PROBABILITY: 0.2,
+        MAX_HEIGHT_OFFSET: 40,
+        MIN_HEIGHT_OFFSET: 20
     }
 }
+
+
+
 
 export default GAME;
