@@ -1,5 +1,5 @@
 import Game from "./game.js";
-import Train from "./train.js";
+import Simulation from "./simulation.js";
 
 function playGame(){
     const game = new Game(document.getElementById("game"))
@@ -7,7 +7,7 @@ function playGame(){
 }
 
 function train(){
-    const session = new Train(128, document.getElementById("game"), 100);
+    const session = new Simulation(64, document.getElementById("game"), 5);
     session.start();
 }
 

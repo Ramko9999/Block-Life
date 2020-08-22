@@ -20,6 +20,7 @@ class Block {
         this.inDuck = false;
         this.isDead = false;
         this.model;
+        this.printOnce = false;
     }
 
 
@@ -105,6 +106,11 @@ class Block {
     }
 
     predict(features) {
+        if(!this.printOnce){
+            console.log(features);
+            console.log(this.model.predict(features));
+            this.printOnce = true;
+        }
         let predictions = this.model.predict(features);
         let mi = 0;
         predictions.forEach((value, i) => {

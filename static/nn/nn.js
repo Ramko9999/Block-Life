@@ -66,13 +66,14 @@ class ActivationFunction {
   
       // Generating the Hidden Outputs
       let inputs = Matrix.fromArray(input_array);
+      
       let hidden = Matrix.multiply(this.weights_ih, inputs);
       hidden.add(this.bias_h);
       // activation function!
       hidden.map(this.activation_function.func);
-  
       // Generating the output's output!
       let output = Matrix.multiply(this.weights_ho, hidden);
+      
       output.add(this.bias_o);
       output.map(this.activation_function.func);
   
@@ -144,7 +145,10 @@ class ActivationFunction {
 
 
     flatten(){
-      
+      return [JSON.parse(this.weights_ih.serialize()), 
+        JSON.parse(this.weights_ho.serialize()),
+        JSON.parse(this.bias_h.serialize()), 
+        JSON.parse(this.bias_o.serialize())];
     }
   
     serialize() {
@@ -161,11 +165,10 @@ class ActivationFunction {
       nn.bias_h = Matrix.deserialize(data.bias_h);
       nn.bias_o = Matrix.deserialize(data.bias_o);
       nn.learning_rate = data.learning_rate;
+      nn.setActivationFunction();
       return nn;
     }
-  
-  
-    // Adding function for neuro-evolution
+
     copy() {
       return new NeuralNetwork(this);
     }

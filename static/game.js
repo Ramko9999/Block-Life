@@ -15,17 +15,17 @@ class Game {
 
     constructor(canvas) {
         this.ct = canvas.getContext("2d");
-        this.startEnviromentVars();
-        this.players = [];
+        this.startEnviroment();
     }
 
-    startEnviromentVars() {
+    startEnviroment() {
         this.obstacleSpeed = GAME.OBSTACLE.BASE_SPEED;
         this.randomMultipler = 0.045;
         this.obstacleQueue = [];
         this.gameOver = false;
         this.minimumTiles = GAME.OBSTACLE.COOLDOWN; // a cooldown counter
         this.counter = 0;
+        this.players = [];
     }
 
     drawScoreboard(score){
@@ -64,8 +64,6 @@ class Game {
             if (random < this.randomMultipler) {
                 let obstacle = new Obstacle(GAME.WIDTH - 15, this.obstacleSpeed);
                 this.obstacleQueue.push(obstacle);
-
-                //reduce likeyhood for generating obstacle instantly and create a cooldown period
                 this.randomMultipler -= this.randomMultipler * 0.1;
                 this.counter = this.minimumTiles;
                 this.obstacleSpeed *= 1.005;
@@ -101,32 +99,24 @@ class Game {
     }
 
     resetGame() {
-        this.startEnviromentVars();
-        this.players = [];
+        this.startEnviroment();
         this.start();
     }
 
     runGame() {
-
         this.ct.clearRect(0, 0, GAME.WIDTH, GAME.HEIGHT);
-
         if (this.gameOver) {
             console.log("Game over");
         } else {
-
             this.generateObstacle();
-
             for (const obstacle of this.obstacleQueue) {
                 obstacle.move();
                 obstacle.draw(this.ct);
             }
-          
-            
             if (this.obstacleQueue.length > 0) {
                 this.checkForCollision();
                 this.removeObstacle();
             }
-
             for (const player of this.players) {
                 if (!player.isDead) {
                     player.move();
@@ -134,9 +124,7 @@ class Game {
                 }
             }
         }
-
         this.drawScoreboard(this.players[0].score);
-
         this.obstacleSpeed *= 1.0005;
         requestAnimationFrame(() => this.runGame());
     }

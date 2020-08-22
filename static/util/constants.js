@@ -18,10 +18,11 @@ const GAME = {
         AIR_PROBABILITY: 0.2,
         MAX_HEIGHT_OFFSET: 40,
         MIN_HEIGHT_OFFSET: 20
+    },
+    MODEL:{
+        INPUT: 4,
+        HIDDEN: 4,
+        OUTPUT: 4
     }
 }
-
-
-
-
 export default GAME;
