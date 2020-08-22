@@ -7,7 +7,7 @@ function playGame(){
 }
 
 function train(){
-    const session = new Simulation(64, document.getElementById("game"), 5);
+    const session = new Simulation(16, document.getElementById("game"), 30);
     session.start();
 }
 

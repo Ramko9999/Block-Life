@@ -20,7 +20,6 @@ class Block {
         this.inDuck = false;
         this.isDead = false;
         this.model;
-        this.printOnce = false;
     }
 
 
@@ -39,7 +38,6 @@ class Block {
     getW() {
         return this.width;
     }
-
 
     setModel(model) {
         this.model = model;
@@ -62,8 +60,28 @@ class Block {
                 this.width,
                 this.height,
             );
+            ct.fillText(
+                `${this.score}`,
+                this.position.x,
+                this.position.y,
+            );
         }
     }
+
+    revive(){
+        this.position = {
+            x: GAME.BLOCK.START_X,
+            y: GAME.HEIGHT - this.height,
+        };
+        this.velocity = {
+            x: 0,
+            y: 0,
+        }
+        this.inJump = false;
+        this.inDuck = false;
+        this.isDead = false;
+    }
+
 
     release() {
         this.inDuck = false;
@@ -106,11 +124,6 @@ class Block {
     }
 
     predict(features) {
-        if(!this.printOnce){
-            console.log(features);
-            console.log(this.model.predict(features));
-            this.printOnce = true;
-        }
         let predictions = this.model.predict(features);
         let mi = 0;
         predictions.forEach((value, i) => {

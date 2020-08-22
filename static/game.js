@@ -79,7 +79,6 @@ class Game {
     removeObstacle() {
         if (this.obstacleQueue[0].position.x < 0) {
             this.obstacleQueue.shift();
-
             for (const player of this.players) {
                 player.score += 1;
             }
@@ -124,7 +123,7 @@ class Game {
                 }
             }
         }
-        this.drawScoreboard(this.players[0].score);
+        this.drawScoreboard(this.players[0].score)
         this.obstacleSpeed *= 1.0005;
         requestAnimationFrame(() => this.runGame());
     }

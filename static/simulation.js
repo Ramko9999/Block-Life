@@ -4,6 +4,7 @@ import Block from "./block.js";
 import Game from "./game.js";
 import GAME from "./util/constants.js";
 import NeuralNetwork from "./nn/nn.js";
+import {isColliding} from "./util/collision.js"; 
 
 class Simulation extends Game {
 
@@ -12,7 +13,14 @@ class Simulation extends Game {
         this.n = n;
         this.epochs = epochs;
         this.players;
-        this.printOnce = false;
+        this.phase = 1000;
+    }
+
+    
+    drawEpochs(){
+        this.ct.font ="24px Arial";
+        this.ct.fillStyle ="#000000";
+        this.ct.fillText("Epochs: " + this.epochs, 8, 25);
     }
 
 
@@ -75,6 +83,7 @@ class Simulation extends Game {
             }
             return NeuralNetwork.deserialize(netData);
         }
+
         const aLayers = a.flatten();
         const bLayers = b.flatten();
         const cLayers = [];
@@ -152,6 +161,7 @@ class Simulation extends Game {
     }
 
     resetGame() {
+        this.phase = 1000;
         const generation = this.createNextGeneration();
         this.startEnviroment();
         this.players = generation.map((model) => {
@@ -160,7 +170,6 @@ class Simulation extends Game {
             return block;
         });
         this.epochs--;
-        this.printOnce = false;
         requestAnimationFrame(() => this.runGame());
     }
 
@@ -186,12 +195,35 @@ class Simulation extends Game {
         return [odx, oy, oh, ow];
     }
 
-    runGame() {
-        if(!this.printOnce){
-            this.printOnce = true;
+    removeObstacle() {
+        if (this.obstacleQueue[0].position.x < 0) {
+            this.obstacleQueue.shift();
+            for (const player of this.players) {
+                if(player.isDead){
+                    player.revive();
+                }
+                else{
+                    player.score += 1;
+                }
+            }
         }
+    }
+    
+    checkForCollision() {
+        let nearest = this.obstacleQueue[0];
+        for (const player of this.players){
+            let playerCoordinates = {x: player.getX(), y: player.getY(), w:player.getW(), h:player.getH()}
+            let nearestCoordinates = {x: nearest.getX(), y:nearest.getY(), w:nearest.getW(), h:nearest.getH()}
+            if (isColliding(playerCoordinates, nearestCoordinates)) {
+                player.isDead = true;
+            }
+        }
+    }
+
+    runGame() {
+        this.phase -= 1;
         this.ct.clearRect(0, 0, GAME.WIDTH, GAME.HEIGHT);
-        if (this.gameOver) {
+        if (this.phase === 0) {
             if (this.epochs > 0) {
                 this.resetGame();
             }
@@ -206,6 +238,8 @@ class Simulation extends Game {
                 this.checkForCollision();
                 this.removeObstacle();
             }
+
+            let maxScore = 0;
             for (const player of this.players) {
                 if (!player.isDead) {
                     if (!player.inJump) {
@@ -214,8 +248,11 @@ class Simulation extends Game {
                     player.move();
                     player.draw(this.ct);
                 }
+                maxScore= Math.max(maxScore, player.score);
             }
-            this.drawScoreboard(this.players[0].score);
+
+            this.drawScoreboard(maxScore);
+            //this.drawEpochs();
             requestAnimationFrame(() => this.runGame());
         }
     }
